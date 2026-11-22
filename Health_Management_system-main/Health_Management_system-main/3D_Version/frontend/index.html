@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareSync - Patient Management System</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Chart.js for Graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="ph-fill ph-heartbeat logo-icon"></i>
+                <h2>CareSync</h2>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item active" data-target="dashboard">
+                        <i class="ph ph-squares-four"></i>
+                        <span>Dashboard</span>
+                    </li>
+                    <li class="nav-item" data-target="patients">
+                        <i class="ph ph-users"></i>
+                        <span>Patients</span>
+                    </li>
+                    <li class="nav-item" data-target="treatments">
+                        <i class="ph ph-stethoscope"></i>
+                        <span>Treatments</span>
+                    </li>
+                    <li class="nav-item" data-target="medications">
+                        <i class="ph ph-pill"></i>
+                        <span>Medications</span>
+                    </li>
+                    <li class="nav-item" data-target="history">
+                        <i class="ph ph-clock-counter-clockwise"></i>
+                        <span>History</span>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile" id="userProfileBtn">
+                    <div class="avatar">
+                        <img src="https://ui-avatars.com/api/?name=Dr+Smith&background=2563eb&color=fff" alt="User Avatar">
+                    </div>
+                    <div class="user-info">
+                        <h4>Dr. Smith</h4>
+                        <p>Cardiologist</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="search-bar">
+                    <i class="ph ph-magnifying-glass"></i>
+                    <input type="text" id="globalSearch" placeholder="Search patients, ID, or treatments...">
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" id="themeToggleBtn">
+                        <i class="ph ph-moon"></i> Theme
+                    </button>
+                    <button class="icon-btn" id="notificationsBtn" aria-label="Notifications">
+                        <i class="ph ph-bell"></i>
+                        <span class="badge">3</span>
+                    </button>
+                    <button class="btn btn-primary" id="addPatientBtn">
+                        <i class="ph ph-plus"></i> New Patient
+                    </button>
+                </div>
+            </header>
+
+            <div class="view-container">
+                <!-- Dashboard View -->
+                <section id="dashboard" class="view active">
+                    <div class="view-header">
+                        <div>
+                            <h1>Dashboard Overview</h1>
+                            <p class="subtitle">Welcome back, here's what's happening today.</p>
+                        </div>
+                        <div class="date-filter">
+                            <i class="ph ph-calendar-blank"></i>
+                            <span id="currentDateDisplay">Today</span>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card glass clickable" id="totalPatientsCard" title="Click to view graph">
+                            <div class="stat-icon blue">
+                                <i class="ph ph-users-three"></i>
+                            </div>
+                            <div class="stat-details">
+                                <h3>Total Patients</h3>
+                                <p class="stat-value">1,248</p>
+                                <span class="trend positive"><i class="ph ph-trend-up"></i> +12% this month</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card glass clickable" id="activeTreatmentsCard" title="Click to view graph">
+                            <div class="stat-icon purple">
+                                <i class="ph ph-activity"></i>
+                            </div>
+                            <div class="stat-details">
+                                <h3>Active Treatments</h3>
+                                <p class="stat-value">342</p>
+                                <span class="trend positive"><i class="ph ph-trend-up"></i> +5% this month</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card glass clickable" id="upcomingFollowUpsCard" title="Click to view details">
+                            <div class="stat-icon orange">
+                                <i class="ph ph-calendar-check"></i>
+                            </div>
+                            <div class="stat-details">
+                                <h3>Upcoming Follow-ups</h3>
+                                <p class="stat-value">28</p>
+                                <span class="trend neutral">Next 7 days</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-grid">
+                        <!-- Recent Patients Table -->
+                        <div class="card glass span-2">
+                            <div class="card-header">
+                                <h3>Recent Patients</h3>
+                                <button class="btn-text" id="viewAllPatientsBtn">View All <i class="ph ph-arrow-right"></i></button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Patient Name</th>
+                                            <th>ID</th>
+                                            <th>Mobile No</th>
+                                            <th>Disease</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentPatientsList">
+                                        <!-- Populated via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Today's Schedule -->
+                        <div class="card glass">
+                            <div class="card-header">
+                                <h3>Today's Follow-ups</h3>
+                            </div>
+                            <ul class="schedule-list" id="todayScheduleList">
+                                <!-- Populated via JS -->
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Patients View (Hidden by default) -->
+                <section id="patients" class="view">
+                    <div class="view-header">
+                        <div>
+                            <h1>Patient Directory</h1>
+                            <p class="subtitle">Manage and view all patient records.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card glass full-height">
+                        <div class="table-controls">
+                            <div class="filter-group">
+                                <select class="select-input" id="statusFilter">
+                                    <option value="all">All Status</option>
+                                    <option value="active">Active Treatment</option>
+                                    <option value="discharged">Discharged</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Patient ID</th>
+                                        <th>Name</th>
+                                        <th>Age/Gender</th>
+                                        <th>Contact</th>
+                                        <th>Medical History</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="allPatientsList">
+                                    <!-- Populated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Treatments View -->
+                <section id="treatments" class="view">
+                    <div class="view-header">
+                        <div>
+                            <h1>Treatments Tracker</h1>
+                            <p class="subtitle">Track patient treatment plans and durations.</p>
+                        </div>
+                    </div>
+                    <div class="card glass full-height">
+                        <div class="table-controls">
+                            <div class="search-bar" style="width: 300px; margin-bottom: 0;">
+                                <i class="ph ph-magnifying-glass"></i>
+                                <input type="text" id="searchTreatments" placeholder="Search by Patient ID...">
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Patient ID</th>
+                                        <th>Disease</th>
+                                        <th>Start Date</th>
+                                        <th>Duration</th>
+                                        <th>Next Follow-up</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="treatmentsList">
+                                    <!-- Populated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Medications View -->
+                <section id="medications" class="view">
+                    <div class="view-header">
+                        <div>
+                            <h1>Medications Log</h1>
+                            <p class="subtitle">Manage patient prescriptions and dosages.</p>
+                        </div>
+                    </div>
+                    <div class="card glass full-height">
+                        <div class="table-controls">
+                            <div class="search-bar" style="width: 300px; margin-bottom: 0;">
+                                <i class="ph ph-magnifying-glass"></i>
+                                <input type="text" id="searchMedications" placeholder="Search by Patient ID...">
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Patient ID</th>
+                                        <th>Medicine Name</th>
+                                        <th>Dosage</th>
+                                        <th>Frequency</th>
+                                        <th>Prescribed On</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="medicationsList">
+                                    <!-- Populated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- History View -->
+                <section id="history" class="view">
+                    <div class="view-header">
+                        <div>
+                            <h1>Patient History</h1>
+                            <p class="subtitle">View complete history of all patients (past and present).</p>
+                        </div>
+                    </div>
+                    <div class="card glass full-height">
+                        <div class="table-controls">
+                            <div class="search-bar" style="width: 300px; margin-bottom: 0;">
+                                <i class="ph ph-magnifying-glass"></i>
+                                <input type="text" id="searchHistory" placeholder="Search history...">
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Patient ID</th>
+                                        <th>Name</th>
+                                        <th>Disease</th>
+                                        <th>History Details</th>
+                                        <th>Last Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historyList">
+                                    <!-- Populated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Patient Modal -->
+                <div class="modal-overlay" id="patientModal">
+                    <div class="modal glass">
+                        <div class="modal-header">
+                            <h2 id="modalTitle">Add New Patient</h2>
+                            <button class="close-btn" id="closeModalBtn"><i class="ph ph-x"></i></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="addPatientForm">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Full Name</label>
+                                        <input type="text" id="p_name" required>
+                                    </div>
+                                </div>
+                                <div class="form-row split">
+                                    <div class="form-group">
+                                        <label>Age</label>
+                                        <input type="number" id="p_age" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Gender</label>
+                                        <select id="p_gender">
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-row split">
+                                    <div class="form-group">
+                                        <label>Contact Number</label>
+                                        <input type="text" id="p_contact" required>
+                                    </div>
+                                    <div class="form-group" id="statusGroup" style="display: none;">
+                                        <label>Status</label>
+                                        <select id="p_status">
+                                            <option value="active">Active</option>
+                                            <option value="discharged">Discharged</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Medical History (Brief)</label>
+                                        <textarea id="p_history" rows="3"></textarea>
+                                    </div>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-secondary" id="cancelModalBtn">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Save Patient</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+    <!-- Graph Modal -->
+    <div class="modal-overlay" id="graphModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="graphModalTitle">Data Graph</h2>
+                <button class="close-btn" id="closeGraphModalBtn"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="chart-container" style="position: relative; height:40vh; width:100%">
+                    <canvas id="statChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications Modal -->
+    <div class="modal-overlay" id="notificationsModal">
+        <div class="modal glass">
+            <div class="modal-header">
+                <h2>Notifications</h2>
+                <button class="close-btn" id="closeNotificationsBtn"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <ul class="notification-list" id="notificationList">
+                    <!-- Populated via JS -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Follow-ups Modal -->
+    <div class="modal-overlay" id="followUpsModal">
+        <div class="modal glass">
+            <div class="modal-header">
+                <h2>Upcoming Follow-ups</h2>
+                <button class="close-btn" id="closeFollowUpsBtn"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <ul class="schedule-list" id="followUpsDetailsList">
+                    <!-- Populated via JS -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal-overlay" id="profileModal">
+        <div class="modal glass">
+            <div class="modal-header">
+                <h2>My Profile</h2>
+                <button class="close-btn" id="closeProfileBtn"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="profile-details-container">
+                    <div class="profile-avatar-large">
+                        <img src="https://ui-avatars.com/api/?name=Dr+Smith&background=2563eb&color=fff&size=120" alt="Dr Smith">
+                    </div>
+                    <div class="profile-info-large">
+                        <h3>Dr. John Smith</h3>
+                        <p class="role-badge">Senior Cardiologist</p>
+                        
+                        <div class="contact-info">
+                            <p><i class="ph ph-envelope-simple"></i> dr.smith@caresync.com</p>
+                            <p><i class="ph ph-phone"></i> +1 (555) 123-4567</p>
+                            <p><i class="ph ph-map-pin"></i> New York Medical Center, NY</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
